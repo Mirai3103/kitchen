@@ -56,13 +56,21 @@
                 <td><%= chiTiet.getStatus() %></td>
                 <td>
                     <button class="btn btn-sm btn-primary" 
-                     
+                     onclick="startCooking(<%= chiTiet.getId() %>)"
+                     style="<% if(!chiTiet.getStatus().equals("Đang xử lý")) { %>display: none;<% } %>"
                     >
                     Nhận món
                     </button>
                     <button class="btn btn-sm btn-success"
-                   >
-                    Hoàn thành
+                        style="<% if(!chiTiet.getStatus().equals("Đang nấu")) { %>display: none;<% } %>"
+                        onclick="finishCooking(<%= chiTiet.getId() %>)">
+        
+                    Hoàn thành nấu
+                    </button>
+                    <button class="btn btn-sm btn-danger"
+                        style="<% if(!chiTiet.getStatus().equals("Đợi phục vụ")) { %>display: none;<% } %>"
+                        onclick="served(<%= chiTiet.getId() %>)">
+                    Hoàn thành phục vụ
                     </button>
                 </td>
             </tr>
@@ -86,7 +94,64 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
 
     <script>
-      
+          <%-- @PutMapping("start-cooking/{id}")
+    public Map<String, Object> startCooking(@PathVariable int id) {
+        var chiTietBan = chiTietBanRepository.findById(id);
+        chiTietBan.ifPresent(ctb -> {
+            ctb.setStatus("Đang nấu");
+            chiTietBanRepository.save(ctb);
+        });
+        return Map.of("status", true);
+    }
+
+    @PutMapping("finish-cooking/{id}")
+    public Map<String, Object> finishCooking(@PathVariable int id) {
+        var chiTietBan = chiTietBanRepository.findById(id);
+        chiTietBan.ifPresent(ctb -> {
+            ctb.setStatus("Đợi phục vụ");
+            chiTietBanRepository.save(ctb);
+        });
+        return Map.of("status", true);
+    }
+
+    @PutMapping("served/{id}")
+    public Map<String, Object> served(@PathVariable int id) {
+        var chiTietBan = chiTietBanRepository.findById(id);
+        chiTietBan.ifPresent(ctb -> {
+            ctb.setStatus("Hoàn thành");
+            chiTietBanRepository.save(ctb);
+        });
+        return Map.of("status", true);
+    } --%>
+
+    async function startCooking(id) {
+        const response = await fetch(`/api/order/start-cooking/\${id}`, {
+            method: 'PUT'
+        });
+        if (response.ok) {
+            window.location.reload();
+        }
+    }
+
+    async function finishCooking(id) {
+        const response = await fetch(`/api/order/finish-cooking/\${id}`, {
+            method: 'PUT'
+        });
+        if (response.ok) {
+            window.location.reload();
+        }
+    }
+
+    async function served(id) {
+        const response = await fetch(`/api/order/served/\${id}`, {
+            method: 'PUT'
+        });
+        if (response.ok) {
+            window.location.reload();
+        }
+    }
+
+
 
 
     </script>

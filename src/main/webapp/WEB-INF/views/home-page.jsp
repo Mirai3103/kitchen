@@ -78,7 +78,7 @@
         <div class="card">
             <h2>Quản Lý Đơn Hàng</h2>
             <p>Theo dõi đơn hàng và tình trạng đơn hàng của khách hàng.</p>
-            <a href="#" class="button">Quản Lý Đơn Hàng</a>
+            <a href="/kitchen-manager" class="button">Quản Lý Đơn Hàng</a>
         </div>
 
         <div class="card">
@@ -116,35 +116,26 @@
                 notificationList.appendChild(li);
             });
             
-            // Add a "Mark all as read" option if there are unread notifications
-            if (unreadNotifications > 0) {
-                const markAllAsReadLi = document.createElement('li');
-                markAllAsReadLi.innerHTML = `
-                    <hr class="dropdown-divider">
-                    <a class="dropdown-item text-primary" href="#" onclick="markAllAsRead(event)">Đánh dấu tất cả là đã đọc</a>
-                `;
-                notificationList.appendChild(markAllAsReadLi);
-            }
+          
         }
 
         function markAsRead(id, event) {
             event.preventDefault();
             const notification = notifications.find(n => n.id === id);
-            if (notification && !notification.isRead) {
-                notification.isRead = true;
-                updateNotifications();
-            }
-            // Navigate to the link
-            window.location.href = event.currentTarget.getAttribute('href');
+            deleteNotification(id, notification);
         }
 
-        function markAllAsRead(event) {
-            event.preventDefault();
-            notifications.forEach(notification => {
-                notification.isRead = true;
-            });
-            updateNotifications();
+        function deleteNotification(id, notification) {
+            fetch('/api/notification/' + id, {
+                method: 'DELETE'
+            }).then(() => {
+                notifications = notifications.filter(n => n.id !== id);
+                updateNotifications();
+               if( notification.navigationLink) window.location.href = notification.navigationLink;
+            })
         }
+
+     
       async  function fetchNoti(){
             return fetch('/api/notification')
                 .then(response => response.json())

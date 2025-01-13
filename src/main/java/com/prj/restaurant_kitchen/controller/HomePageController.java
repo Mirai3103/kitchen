@@ -1,5 +1,9 @@
 package com.prj.restaurant_kitchen.controller;
 
+import java.util.List;
+
+import javax.management.Notification;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -10,7 +14,9 @@ import com.prj.restaurant_kitchen.entities.ChiTietBan;
 import com.prj.restaurant_kitchen.repository.BanRepository;
 import com.prj.restaurant_kitchen.repository.ChiTietBanRepository;
 import com.prj.restaurant_kitchen.repository.MenuItemRepository;
+import com.prj.restaurant_kitchen.repository.NotificationRepository;
 
+import jakarta.servlet.http.HttpSession;
 import lombok.AllArgsConstructor;
 import lombok.var;
 
@@ -25,7 +31,9 @@ public class HomePageController {
 
     // Ánh xạ yêu cầu GET tới URL "/home"
     @GetMapping("/home")
-    public ModelAndView homePage() {
+    public ModelAndView homePage(HttpSession session) {
+        System.out.println(session.getAttribute("userLogin"));
+
         // Tạo ModelAndView và chuyển hướng tới trang JSP
         ModelAndView modelAndView = new ModelAndView("home-page");
         return modelAndView;
@@ -35,7 +43,6 @@ public class HomePageController {
     public ModelAndView orderTable(ModelAndView modelAndView) {
         var banList = banRepository.findAll();
         System.out.println(banList.size());
-
         modelAndView.addObject("listBan", banList);
         modelAndView.setViewName("order-table");
         return modelAndView;
@@ -62,7 +69,7 @@ public class HomePageController {
 
     @GetMapping("kitchen-manager")
     public ModelAndView kitchenOrder(ModelAndView modelAndView) {
-        var chiTietBanList = chiTietBanRepository.findAll();
+        var chiTietBanList = chiTietBanRepository.findAllByStatusNotInOrderByIdDesc(List.of("Hoàn thành"));
         modelAndView.addObject("listChiTietBan", chiTietBanList);
         modelAndView.setViewName("kitchen-manager");
         return modelAndView;

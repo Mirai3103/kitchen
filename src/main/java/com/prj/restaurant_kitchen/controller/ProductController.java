@@ -16,8 +16,7 @@ public class ProductController {
 
     @GetMapping("/")
     public String index(Model model) {
-        banRepository.findAll().forEach(ban -> System.out.println(ban));
-        return "index";
+        return "redirect:/login";
     }
 
 }

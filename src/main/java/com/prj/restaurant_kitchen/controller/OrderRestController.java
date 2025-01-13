@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import com.prj.restaurant_kitchen.repository.BanRepository;
 import com.prj.restaurant_kitchen.repository.ChiTietBanRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.web.bind.annotation.PutMapping;
 
 @RestController
 @RequestMapping("/api/order")
@@ -60,6 +61,7 @@ public class OrderRestController {
                 String.format(" %s - %s đã đặt x%d %s", ban.get().getTenBan(), ban.get().getPhong().getTenPhong(),
                         orderRequest.quantity, menuItemOp.get().getTenMon()));
         notification.setRead(false);
+        notification.setNavigationLink("/kitchen-manager");
         notificationRepository.save(notification);
         return Map.of("status", true);
     }
@@ -67,6 +69,51 @@ public class OrderRestController {
     @DeleteMapping("/{id}")
     public Map<String, Object> deleteOrder(@PathVariable int id) {
         chiTietBanRepository.deleteById(id);
+        return Map.of("status", true);
+    }
+
+    @PutMapping("start-cooking/{id}")
+    public Map<String, Object> startCooking(@PathVariable int id) {
+        var chiTietBan = chiTietBanRepository.findById(id);
+        chiTietBan.ifPresent(ctb -> {
+            ctb.setStatus("Đang nấu");
+            chiTietBanRepository.save(ctb);
+        });
+        Notification notification = new Notification();
+        notification.setMessage(String.format("Món %s đang được nấu", chiTietBan.get().getMon().getTenMon()));
+        notification.setRead(false);
+        notification.setNavigationLink("/kitchen-manager");
+        notificationRepository.save(notification);
+        return Map.of("status", true);
+    }
+
+    @PutMapping("finish-cooking/{id}")
+    public Map<String, Object> finishCooking(@PathVariable int id) {
+        var chiTietBan = chiTietBanRepository.findById(id);
+        chiTietBan.ifPresent(ctb -> {
+            ctb.setStatus("Đợi phục vụ");
+            chiTietBanRepository.save(ctb);
+        });
+        Notification notification = new Notification();
+        notification.setMessage(String.format("Món %s đã nấu xong", chiTietBan.get().getMon().getTenMon()));
+        notification.setRead(false);
+        notification.setNavigationLink("/kitchen-manager");
+        notificationRepository.save(notification);
+        return Map.of("status", true);
+    }
+
+    @PutMapping("served/{id}")
+    public Map<String, Object> served(@PathVariable int id) {
+        var chiTietBan = chiTietBanRepository.findById(id);
+        chiTietBan.ifPresent(ctb -> {
+            ctb.setStatus("Hoàn thành");
+            chiTietBanRepository.save(ctb);
+        });
+        Notification notification = new Notification();
+        notification.setMessage(String.format("Món %s đã được phục vụ", chiTietBan.get().getMon().getTenMon()));
+        notification.setRead(false);
+        notification.setNavigationLink("/kitchen-manager");
+        notificationRepository.save(notification);
         return Map.of("status", true);
     }
 }
