@@ -9,7 +9,9 @@
 <title>Danh sách bàn</title>
 </head>
 <body>
+
 	<h1>Danh sách bàn trong phòng ${idPhong}</h1>
+	
 	<form method="post" action="phong">
 		<label for="tenBan">Tên bàn:</label> <input type="text" name="tenBan"
 			id="tenBan" required> <label for="status">Trạng thái:</label>

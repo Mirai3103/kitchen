@@ -9,7 +9,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;700&display=swap" rel="stylesheet">
     <title>Trang Quản Lý Nhà Hàng</title>
-    
+       <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+     <style>
+        .notification-item {
+            white-space: normal;
+            width: 300px;
+        }
+        .notification-item.unread {
+            background-color: #f0f8ff;
+        }
+        .dropdown{
+            position: static;
+        }
+    </style>
 </head>
 
 <body>
@@ -31,7 +46,15 @@
         <a href="<%=request.getContextPath()%>/employee">Nhân Viên</a>
         <a href="<%=request.getContextPath()%>/customer">Khách hàng</a>
         <a href="<%=request.getContextPath()%>/restaurant">Đặt món</a>
-        
+          <div class="dropdown">
+            <button class="btn btn-primary dropdown-toggle" type="button" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-bell-fill"></i>
+                <span id="unreadCount" class="badge bg-danger"></span>
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="notificationDropdown" id="notificationList">
+                <!-- Notifications will be dynamically added here -->
+            </ul>
+        </div>
     </nav>
 
     <div class="container">
@@ -49,7 +72,7 @@
         <div class="card">
             <h2>Quản Lý Đặt Bàn</h2>
             <p>Quản lý các đơn đặt bàn của khách hàng, kiểm tra tình trạng bàn còn trống.</p>
-            <a href="#" class="button">Quản Lý Đặt Bàn</a>
+            <a href="/order-table" class="button">Quản Lý Đặt Bàn</a>
         </div>
 
         <div class="card">
@@ -64,7 +87,80 @@
             <a href="#" class="button">Xem Báo Cáo</a>
         </div>
     </div>
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+  <script>
+        // Sample notifications data (replace with actual data from your backend)
+        let notifications = [];
 
+        function updateNotifications() {
+            const notificationList = document.getElementById('notificationList');
+            const unreadCount = document.getElementById('unreadCount');
+            
+            // Clear existing notifications
+            notificationList.innerHTML = '';
+            
+            // Count unread notifications
+            const unreadNotifications = notifications.filter(n => !n.isRead).length;
+            unreadCount.textContent = unreadNotifications > 0 ? unreadNotifications : '';
+            
+            // Add notifications to the dropdown
+            notifications.forEach(notification => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <a class="dropdown-item notification-item \${notification.isRead ? '' : 'unread'}" href="\${notification.navigationLink}" onclick="markAsRead(\${notification.id}, event)">
+                        \${notification.message}
+                        \${notification.isRead ? '' : '<span class="ms-2 badge bg-primary">Mới</span>'}
+                    </a>
+                `;
+                notificationList.appendChild(li);
+            });
+            
+            // Add a "Mark all as read" option if there are unread notifications
+            if (unreadNotifications > 0) {
+                const markAllAsReadLi = document.createElement('li');
+                markAllAsReadLi.innerHTML = `
+                    <hr class="dropdown-divider">
+                    <a class="dropdown-item text-primary" href="#" onclick="markAllAsRead(event)">Đánh dấu tất cả là đã đọc</a>
+                `;
+                notificationList.appendChild(markAllAsReadLi);
+            }
+        }
+
+        function markAsRead(id, event) {
+            event.preventDefault();
+            const notification = notifications.find(n => n.id === id);
+            if (notification && !notification.isRead) {
+                notification.isRead = true;
+                updateNotifications();
+            }
+            // Navigate to the link
+            window.location.href = event.currentTarget.getAttribute('href');
+        }
+
+        function markAllAsRead(event) {
+            event.preventDefault();
+            notifications.forEach(notification => {
+                notification.isRead = true;
+            });
+            updateNotifications();
+        }
+      async  function fetchNoti(){
+            return fetch('/api/notification')
+                .then(response => response.json())
+                .then(data => {
+                    notifications = data;
+                    updateNotifications();
+                });
+        }
+        fetchNoti();
+        // Initial update
+
+        // Simulating new notifications (for demo purposes)
+        setInterval(() => {
+            fetchNoti();
+        }, 10000); // Add a new notification every 10 seconds
+    </script>
 </body>
 
 <style>

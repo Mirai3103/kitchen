@@ -16,7 +16,11 @@
 </head>
 <body>
     <div class="container mt-5">
+    <div class="d-flex justify-content-between">
         <h2 class="mb-4">Danh sách bàn</h2>
+        <a href="/home">Quay lại </a>
+	</div>
+       
         <table class="table table-hover">
             <thead class="table-light">
                 <tr>

@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/order")
 @AllArgsConstructor
 public class OrderController {
-
     private final OrderRepository orderRepository;
 
     // Show order page
