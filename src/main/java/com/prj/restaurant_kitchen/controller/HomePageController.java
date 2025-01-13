@@ -1,6 +1,8 @@
 package com.prj.restaurant_kitchen.controller;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.management.Notification;
 
@@ -70,6 +72,32 @@ public class HomePageController {
     @GetMapping("kitchen-manager")
     public ModelAndView kitchenOrder(ModelAndView modelAndView) {
         var chiTietBanList = chiTietBanRepository.findAllByStatusNotInOrderByIdDesc(List.of("Hoàn thành"));
+
+        Set<Integer> pendingCategoryIds = chiTietBanList.stream()
+                .filter(record -> "Đang nấu".equals(record.getStatus()))
+                .map(record -> record.getIdMon())
+                .collect(Collectors.toSet());
+        chiTietBanList.sort((r1, r2) -> {
+            // Ưu tiên theo status
+            if ("Đang nấu".equals(r1.getStatus()) && !"Đang nấu".equals(r2.getStatus())) {
+                return -1;
+            }
+            if (!"Đang nấu".equals(r1.getStatus()) && "Đang nấu".equals(r2.getStatus())) {
+                return 1;
+            }
+
+            // Ưu tiên theo categoryId nếu cùng với PENDING
+            if (pendingCategoryIds.contains(r1.getIdMon()) && !pendingCategoryIds.contains(r2.getIdMon())) {
+                return -1;
+            }
+            if (!pendingCategoryIds.contains(r1.getIdMon()) && pendingCategoryIds.contains(r2.getIdMon())) {
+                return 1;
+            }
+
+            // Sắp xếp theo thời gian
+            return r1.getCreatedAt().compareTo(r2.getCreatedAt());
+        });
+
         modelAndView.addObject("listChiTietBan", chiTietBanList);
         modelAndView.setViewName("kitchen-manager");
         return modelAndView;

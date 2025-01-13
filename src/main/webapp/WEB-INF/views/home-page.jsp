@@ -150,7 +150,7 @@
         // Simulating new notifications (for demo purposes)
         setInterval(() => {
             fetchNoti();
-        }, 10000); // Add a new notification every 10 seconds
+        }, 3000); // Add a new notification every 10 seconds
     </script>
 </body>
 

@@ -1,5 +1,7 @@
 package com.prj.restaurant_kitchen.entities;
 
+import java.sql.Timestamp;
+
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -47,7 +49,9 @@ public class ChiTietBan {
 	private double thanhTien;
 	@Column(nullable = true)
 	private String status = "Đang xử lý";
-
+	@Column(nullable = true)
+	private Timestamp createdAt = new Timestamp(System.currentTimeMillis());
+	
 	// Custom Setter for `soLuong` and `donGia` to calculate `thanhTien`
 	public void setSoLuong(int soLuong) {
 		this.soLuong = soLuong;

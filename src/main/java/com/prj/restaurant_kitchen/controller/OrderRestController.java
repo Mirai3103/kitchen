@@ -6,10 +6,15 @@ import org.springframework.web.bind.annotation.RestController;
 import com.prj.restaurant_kitchen.entities.ChiTietBan;
 import com.prj.restaurant_kitchen.entities.MenuItem;
 import com.prj.restaurant_kitchen.entities.Notification;
+import com.prj.restaurant_kitchen.entities.RecipeDetail;
 import com.prj.restaurant_kitchen.repository.MenuItemRepository;
 import com.prj.restaurant_kitchen.repository.NotificationRepository;
+import com.prj.restaurant_kitchen.repository.RecipeDetailRepository;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,6 +25,8 @@ import com.prj.restaurant_kitchen.repository.BanRepository;
 import com.prj.restaurant_kitchen.repository.ChiTietBanRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/api/order")
@@ -29,6 +36,7 @@ public class OrderRestController {
     private final ChiTietBanRepository chiTietBanRepository;
     private final BanRepository banRepository;
     private final NotificationRepository notificationRepository;
+    private final RecipeDetailRepository recipeDetailRepository;
 
     public static class OrderRequest {
         public int tableId;
@@ -74,6 +82,7 @@ public class OrderRestController {
 
     @PutMapping("start-cooking/{id}")
     public Map<String, Object> startCooking(@PathVariable int id) {
+        // todo: tru nguyen lieu
         var chiTietBan = chiTietBanRepository.findById(id);
         chiTietBan.ifPresent(ctb -> {
             ctb.setStatus("Đang nấu");
@@ -116,4 +125,36 @@ public class OrderRestController {
         notificationRepository.save(notification);
         return Map.of("status", true);
     }
+
+    @GetMapping("kitchen")
+    public List<ChiTietBan> getAllOrderItem() {
+        var chiTietBanList = chiTietBanRepository.findAllByStatusNotInOrderByIdDesc(List.of("Hoàn thành"));
+
+        Set<Integer> pendingCategoryIds = chiTietBanList.stream()
+                .filter(record -> "Đang nấu".equals(record.getStatus()))
+                .map(record -> record.getIdMon())
+                .collect(Collectors.toSet());
+        chiTietBanList.sort((r1, r2) -> {
+            // Ưu tiên theo status
+            if ("Đang nấu".equals(r1.getStatus()) && !"Đang nấu".equals(r2.getStatus())) {
+                return -1;
+            }
+            if (!"Đang nấu".equals(r1.getStatus()) && "Đang nấu".equals(r2.getStatus())) {
+                return 1;
+            }
+
+            // Ưu tiên theo categoryId nếu cùng với PENDING
+            if (pendingCategoryIds.contains(r1.getIdMon()) && !pendingCategoryIds.contains(r2.getIdMon())) {
+                return -1;
+            }
+            if (!pendingCategoryIds.contains(r1.getIdMon()) && pendingCategoryIds.contains(r2.getIdMon())) {
+                return 1;
+            }
+
+            // Sắp xếp theo thời gian
+            return r1.getCreatedAt().compareTo(r2.getCreatedAt());
+        });
+        return chiTietBanList;
+    }
+
 }
