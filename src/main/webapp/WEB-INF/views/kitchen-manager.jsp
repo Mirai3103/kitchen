@@ -126,6 +126,9 @@
                 async init() {
                     this.listChiTietBan = await this.getAllOrderItem();
                     this.ingredientsModal = new bootstrap.Modal(document.getElementById('ingredientsModal'));
+                    setInterval(() => {
+                        this.listChiTietBan = this.getAllOrderItem();
+                    }, 5000);                                                                                                   
                 },
                 async getAllOrderItem() {
                     const response = await fetch('/api/order/kitchen', {
