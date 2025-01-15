@@ -33,7 +33,9 @@
      
         <div class="d-flex justify-content-between">
             <h2 class="mb-4">Danh sách nguyên liệu và lô  nguyên liệu</h2>
-            <a href="/home">Quay lại</a>
+            <button
+            onclick="window.history.back()"
+            >Quay lại</button>
 	    </div>
         <div class="accordion" id="materialAccordion">
             <template x-for="(material, index) in materials" :key="material.id">
@@ -49,7 +51,7 @@
                         </button>
                     </h2>
                     <div :id="'collapse' + material.id" class="accordion-collapse collapse"
-                         :aria-labelledby="'heading' + material.id" data-bs-parent="#materialAccordion">
+                         :aria-labelledby="'heading' + material.id" >
                         <div class="accordion-body">
                             <table class="table table-striped">
                                 <thead>
@@ -109,9 +111,9 @@
                 },
                 getStatus(date) {
                     const daysUntilExpiry = dayjs(date).diff(dayjs(), 'day');
-                    if (daysUntilExpiry < 0) return 'Expired';
-                    if (daysUntilExpiry <= 3) return 'Expiring Soon';
-                    return 'Valid';
+                    if (daysUntilExpiry < 0) return 'Đã hết hạn';
+                    if (daysUntilExpiry <= 3) return 'Sắp hết hạn';
+                    return 'Còn hạn';
                 }
             }
         }

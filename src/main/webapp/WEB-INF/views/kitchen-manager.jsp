@@ -24,7 +24,12 @@
     <div class="container mt-5" x-data="orderData()">
         <div class="d-flex justify-content-between">
             <h2 class="mb-4">Danh sách món cần làm</h2>
+            <div>
+            <a href="/material" class="btn btn-primary">
+            Xem kho nguyên liệu
+            </a>
             <a href="/home">Quay lại</a>
+            </div>
         </div>
         <table class="table table-hover">
             <thead class="table-light">
@@ -140,15 +145,22 @@
                     return [];
                 },
                 async startCooking(id) {
-                    const response = await fetch(`/api/order/start-cooking/${id}`, {
+                    fetch(`/api/order/start-cooking/\${id}`, {
                         method: 'PUT'
+                    }).then(response => {
+                        return response.json();
+                    }).then(status => {
+                        if (status.message) {
+                            alert(status.message);
+                        } else {
+                            this.updateOrderStatus(id, 'Đang nấu');
+                        }
+                    }).catch(error => {
+                        console.error(error);
                     });
-                    if (response.ok) {
-                        this.updateOrderStatus(id, 'Đang nấu');
-                    }
                 },
                 async finishCooking(id) {
-                    const response = await fetch(`/api/order/finish-cooking/${id}`, {
+                    const response = await fetch(`/api/order/finish-cooking/\${id}`, {
                         method: 'PUT'
                     });
                     if (response.ok) {
@@ -156,7 +168,7 @@
                     }
                 },
                 async served(id) {
-                    const response = await fetch(`/api/order/served/${id}`, {
+                    const response = await fetch(`/api/order/served/\${id}`, {
                         method: 'PUT'
                     });
                     if (response.ok) {
