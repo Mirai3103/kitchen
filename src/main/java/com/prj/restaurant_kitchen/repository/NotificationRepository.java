@@ -21,4 +21,8 @@ public interface NotificationRepository extends JpaRepository<Notification, Inte
     List<Notification> findAllByOrderByIdDesc(Pageable pageable);
 
     List<Notification> findAllByTableIdOrderByIdDesc(int tableId, Pageable pageable);
+
+    @Query("DELETE FROM Notification n WHERE n.tableId = ?1")
+    @Modifying
+    void deleteAllByTableId(int tableId);
 }
