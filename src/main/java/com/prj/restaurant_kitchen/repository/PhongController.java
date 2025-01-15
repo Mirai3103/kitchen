@@ -52,7 +52,7 @@ public class PhongController {
             @RequestParam(value = "tenBan", required = false) String tenBan,
             @RequestParam(value = "idPhong", required = false) Integer idPhong,
             @RequestParam(value = "status", required = false) String status,
-            @RequestParam(value = "tenPhong", required = false) String tenPhong,
+                @RequestParam(value = "tenPhong", required = false) String tenPhong,
             RedirectAttributes redirectAttributes) {
 
         if ("addBan".equals(action)) {

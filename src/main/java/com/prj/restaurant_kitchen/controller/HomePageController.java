@@ -12,17 +12,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.prj.restaurant_kitchen.entities.Ban;
-import com.prj.restaurant_kitchen.entities.ChiTietBan;
 import com.prj.restaurant_kitchen.repository.BanRepository;
 import com.prj.restaurant_kitchen.repository.ChiTietBanRepository;
 import com.prj.restaurant_kitchen.repository.MenuItemRepository;
-import com.prj.restaurant_kitchen.repository.NotificationRepository;
 
 import jakarta.servlet.http.HttpSession;
 import lombok.AllArgsConstructor;
-import lombok.var;
 
-import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @AllArgsConstructor

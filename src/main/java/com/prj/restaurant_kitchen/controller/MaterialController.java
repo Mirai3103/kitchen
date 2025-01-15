@@ -16,7 +16,6 @@ import com.prj.restaurant_kitchen.repository.MaterialRepository;
 import com.prj.restaurant_kitchen.utils.LocalDateTimeAdapter;
 
 import lombok.AllArgsConstructor;
-import lombok.var;
 
 @Controller
 @RequestMapping("/material")
