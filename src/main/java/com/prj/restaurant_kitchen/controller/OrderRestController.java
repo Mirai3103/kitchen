@@ -75,6 +75,7 @@ public class OrderRestController {
         chiTietBan.setDonGia(menuItemOp.get().getGia());
         chiTietBanRepository.save(chiTietBan);
         Notification notification = new Notification();
+        notification.setTableId(orderRequest.tableId);
         notification.setMessage(
                 String.format(" %s - %s đã đặt x%d %s", ban.get().getTenBan(), ban.get().getPhong().getTenPhong(),
                         orderRequest.quantity, menuItemOp.get().getTenMon()));
@@ -101,7 +102,7 @@ public class OrderRestController {
 
         var materialBatchList = materialBatchRepository
                 .findByMaterialIdInAndExpiredDateGreaterThanOrderByExpiredDateAsc(materialIdNeedMap.keySet(),
-                java.time.LocalDateTime.now());
+                        java.time.LocalDateTime.now());
         for (var materialBatch : materialBatchList) {
             var materialId = materialBatch.getMaterialId();
             var quantityNeed = materialIdNeedMap.get(materialId);
@@ -137,6 +138,7 @@ public class OrderRestController {
             chiTietBanRepository.save(ctb);
         });
         Notification notification = new Notification();
+        notification.setTableId(chiTietBan.get().getIdBan());
         notification.setMessage(String.format("Món %s đang được nấu", chiTietBan.get().getMon().getTenMon()));
         notification.setRead(false);
         notification.setNavigationLink("/kitchen-manager");
@@ -152,6 +154,7 @@ public class OrderRestController {
             chiTietBanRepository.save(ctb);
         });
         Notification notification = new Notification();
+        notification.setTableId(chiTietBan.get().getIdBan());
         notification.setMessage(String.format("Món %s đã nấu xong", chiTietBan.get().getMon().getTenMon()));
         notification.setRead(false);
         notification.setNavigationLink("/kitchen-manager");
@@ -167,9 +170,10 @@ public class OrderRestController {
             chiTietBanRepository.save(ctb);
         });
         Notification notification = new Notification();
+        notification.setTableId(chiTietBan.get().getIdBan());
         notification.setMessage(String.format("Món %s đã được phục vụ", chiTietBan.get().getMon().getTenMon()));
         notification.setRead(false);
-        notification.setNavigationLink("/kitchen-manager");
+        notification.setNavigationLink("");
         notificationRepository.save(notification);
         return Map.of("status", true);
     }

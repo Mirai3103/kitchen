@@ -9,6 +9,7 @@
     <title>Danh sách bàn</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="//unpkg.com/alpinejs" defer></script>
     <style>
         body {
             background-color: #f8f9fa;
@@ -48,7 +49,7 @@
     </style>
 </head>
 <body>
-<div class="container mt-5">
+<div class="container mt-5" x-data="notiData()" x-init="init()">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>Danh sách bàn</h2>
         <a href="/home" class="back-link">
@@ -63,14 +64,22 @@
                 for(Ban ban : listBan) {
         %>
         <div class="col-6 col-md-4 col-lg-3">
-            <a href="datmon/<%= ban.getId() %>" class="text-decoration-none">
-                <div class="table-card <%= ban.getStatus().equals("Trống") ? "" : "occupied" %>">
+            <a href="datmon/<%= ban.getId() %>" class="text-decoration-none ">
+                <div class="table-card position-relative <%= ban.getStatus().equals("Trống") ? "" : "occupied" %>">
                     <h5><%= ban.getTenBan() %></h5>
                     <span class="table-status badge <%= ban.getStatus().equals("Trống") ? "bg-success" : "bg-danger" %>">
                                 <%= ban.getStatus() %>
                             </span>
                     <small class="mt-2"><%= ban.getPhong().getTenPhong() %></small>
+                     <span
+                        id="notification-table-<%= ban.getId() %>"
+                        x-text="notiMapByTableId[<%= ban.getId() %>]?.length || 0"
+                      class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                      
+                    <span class="visually-hidden">unread messages</span>
+                </span>
                 </div>
+                 
             </a>
         </div>
         <%
@@ -82,6 +91,31 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+<script>
+ function notiData() {
+    return {
+        notiMapByTableId: {},
+        async fetchNoti() {
+            return fetch('/api/notification?pageSize=1000')
+                .then(response => response.json())
+                .then(data => {
+                  
+                     this.notiMapByTableId = data.reduce((acc, noti) => {
+                        acc[noti.tableId] = [...(acc[noti.tableId] || []), noti];
+                        return acc;
+                    }, {});
+
+                });
+        },
+        init() {
+            this.fetchNoti();
+            setInterval(() => {
+                this.fetchNoti();
+            }, 3000);
+        }
+    }
+}
+</script>
 </body>
 </html>
 

@@ -23,4 +23,5 @@ public class Notification {
     private boolean isRead;
 
     private String navigationLink;
+    private int tableId;
 }

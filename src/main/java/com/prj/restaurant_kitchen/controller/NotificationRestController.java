@@ -16,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/api/notification")
@@ -26,6 +27,11 @@ public class NotificationRestController {
     @PutMapping("/markAsRead/{id}")
     public void markAsRead(@PathVariable int id) {
         notificationRepository.markAsRead(id);
+    }
+
+    @GetMapping("/table/{id}")
+    public List<Notification> getMethodName(@PathVariable int id, Pageable pageable) {
+        return notificationRepository.findAllByTableIdOrderByIdDesc(id, pageable);
     }
 
     @GetMapping("")

@@ -19,4 +19,6 @@ public interface NotificationRepository extends JpaRepository<Notification, Inte
     void markAsRead(int id);
 
     List<Notification> findAllByOrderByIdDesc(Pageable pageable);
+
+    List<Notification> findAllByTableIdOrderByIdDesc(int tableId, Pageable pageable);
 }

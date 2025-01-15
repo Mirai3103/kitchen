@@ -47,7 +47,16 @@
                 Đặt món cho <%= ban.getTenBan() %> - <%= phong.getTenPhong() %>
             </h2>
         </div>
-        <div class="col-auto">
+        <div class="col-auto d-flex gap-2">
+          <div class="dropdown">
+            <button class="btn btn-primary dropdown-toggle" type="button" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-bell-fill"></i>
+                <span id="unreadCount" class="badge bg-danger"></span>
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="notificationDropdown" id="notificationList">
+                <!-- Notifications will be dynamically added here -->
+            </ul>
+        </div>
             <a href="/order-table" class="btn">
                 <i class="fas fa-arrow-left me-2"></i>Quay lại
             </a>
@@ -347,5 +356,69 @@
     }
 
 </script>
+<script>
+        // Sample notifications data (replace with actual data from your backend)
+        let notifications = [];
+
+        function updateNotifications() {
+            const notificationList = document.getElementById('notificationList');
+            const unreadCount = document.getElementById('unreadCount');
+            
+            // Clear existing notifications
+            notificationList.innerHTML = '';
+            
+            // Count unread notifications
+            const unreadNotifications = notifications.filter(n => !n.isRead).length;
+            unreadCount.textContent = unreadNotifications > 0 ? unreadNotifications : '';
+            
+            // Add notifications to the dropdown
+            notifications.forEach(notification => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <a class="dropdown-item notification-item \${notification.isRead ? '' : 'unread'}" href="\${notification.navigationLink}" onclick="markAsRead(\${notification.id}, event)">
+                        \${notification.message}
+                        \${notification.isRead ? '' : '<span class="ms-2 badge bg-primary">Mới</span>'}
+                    </a>
+                `;
+                notificationList.appendChild(li);
+            });
+            
+          
+        }
+
+        function markAsRead(id, event) {
+            event.preventDefault();
+            const notification = notifications.find(n => n.id === id);
+            deleteNotification(id, notification);
+        }
+
+        function deleteNotification(id, notification) {
+            fetch('/api/notification/' + id, {
+                method: 'DELETE'
+            }).then(() => {
+                notifications = notifications.filter(n => n.id !== id);
+                updateNotifications();
+               if( notification.navigationLink) window.location.href = notification.navigationLink;
+            })
+        }
+
+     
+      async  function fetchNoti(){
+         const tableId = <%= ban.getId() %>;
+            return fetch('/api/notification/table/'+tableId)
+                .then(response => response.json())
+                .then(data => {
+                    notifications = data;
+                    updateNotifications();
+                });
+        }
+        fetchNoti();
+        // Initial update
+
+        // Simulating new notifications (for demo purposes)
+        setInterval(() => {
+            fetchNoti();
+        }, 3000); // Add a new notification every 10 seconds
+    </script>
 </body>
 </html>
