@@ -112,12 +112,31 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2><i class="fas fa-utensils me-2"></i>Danh sách món cần làm</h2>
         <div>
-            <a href="/material" class="btn btn-primary me-2">
+            
+          <div class="d-flex gap-2">
+          <a href="/material" class="btn btn-primary me-2">
                 <i class="fas fa-box me-1"></i>Xem kho nguyên liệu
             </a>
             <a href="/home" class="btn btn-outline-secondary">
                 <i class="fas fa-home me-1"></i>Quay lại
             </a>
+             <div class="dropdown">
+            <button class="btn btn-primary dropdown-toggle" type="button" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-bell-fill"></i>
+                <span id="unreadCount" class="badge bg-danger" x-text="needsRushes.length" x-show="needsRushes.length > 0">
+                </span>
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="notificationDropdown" id="notificationList">
+                <template x-for="item in needsRushes" :key="item.id">
+                    <li>
+                        <a class="dropdown-item" href="#">
+                            <strong x-text="item.ban.tenBan + ' - ' + item.phong.tenPhong"></strong> cần gấp làm món <strong x-text="item.mon.tenMon"></strong>
+                        </a>
+                    </li>
+                </template>
+            </ul>
+        </div>
+          </div>
         </div>
     </div>
 
@@ -132,8 +151,12 @@
                          <template x-for="item in list" :key="item.id">
                             <p class="order-details mb-0"><strong>Bàn - Phòng:</strong> <span x-text="item.ban.tenBan + ' - ' + item.phong.tenPhong"></span>
                             <b> x<span x-text="item.soLuong"></span></b>
-                            </p>
-
+                             <span class="priority-badge mt-1 bg-danger text-white"
+                              x-show="item.needsRush">
+                                Cần gấp
+                              </span>
+                            </p> 
+                           
                         </template>
                     </div>
                     <div class="col-lg-3 col-md-6 mb-3 mb-lg-0">
@@ -154,6 +177,8 @@
                                   'bg-info text-white': list[0].priority === 'Low'
                               }"
                               x-text="list[0].priority"></span>
+                        
+                                   
                     </div>
                     <div class="col-lg-3 col-md-6">
                         <div class="d-flex flex-column flex-sm-row justify-content-lg-end align-items-stretch gap-2">
@@ -178,53 +203,7 @@
                 </div>
             </div>
         </template>
-        <template x-for="chiTiet in unmergedList" :key="chiTiet.id">
-            <div class="order-item">
-                <div class="row align-items-center">
-                    <div class="col-lg-4 col-md-6 mb-3 mb-lg-0">
-                        <h5 class="dish-name mb-2" x-text="chiTiet.mon.tenMon"></h5>
-                        <p class="order-details mb-0"><strong>Bàn - Phòng:</strong> <span x-text="chiTiet.ban.tenBan + ' - ' + chiTiet.phong.tenPhong"></span></p>
-                    </div>
-                    <div class="col-lg-3 col-md-6 mb-3 mb-lg-0">
-                        <p class="order-details mb-1"><strong>Số lượng:</strong> <span x-text="chiTiet.soLuong"></span></p>
-                        <p class="order-details mb-0"><strong>Đặt lúc:</strong> <span x-text="formatDate(chiTiet.createdAt)"></span></p>
-                    </div>
-                    <div class="col-lg-2 col-md-6 mb-3 mb-lg-0">
-                        <span class="status-badge me-2"
-                              :class="{
-                                  'bg-warning text-dark': chiTiet.status === 'Đang xử lý',
-                                  'bg-info text-white': chiTiet.status === 'Đang nấu',
-                              }"
-                              x-text="chiTiet.status"></span>
-                        <span class="priority-badge"
-                              :class="{
-                                  'bg-danger text-white': chiTiet.priority === 'High',
-                                  'bg-warning text-dark': chiTiet.priority === 'Medium',
-                                  'bg-info text-white': chiTiet.priority === 'Low'
-                              }"
-                              x-text="chiTiet.priority"></span>
-                    </div>
-                    <div class="col-lg-3 col-md-6">
-                        <div class="d-flex flex-column flex-sm-row justify-content-lg-end align-items-stretch gap-2">
-                            <button class="btn btn-outline-info btn-sm btn-action flex-grow-1"
-                                    @click="viewIngredients(chiTiet.mon.id)">
-                                <i class="fas fa-list-ul me-1"></i>Xem nguyên liệu
-                            </button>
-                            <button class="btn btn-primary btn-sm btn-action flex-grow-1"
-                                    x-show="chiTiet.status === 'Đang xử lý'"
-                                    @click="startCooking(chiTiet.id)">
-                                <i class="fas fa-fire me-1"></i>Nhận món
-                            </button>
-                            <button class="btn btn-success btn-sm btn-action flex-grow-1"
-                                    x-show="chiTiet.status === 'Đang nấu'"
-                                    @click="finishCooking(chiTiet.id)">
-                                <i class="fas fa-check me-1"></i>Hoàn thành nấu
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </template>
+       
         <div class="p-4" x-show="listChiTietBan.length === 0">
             <div class="alert alert-info text-center mb-0">Không có món nào cần làm.</div>
         </div>
@@ -278,7 +257,7 @@
             currentRecipe: [],
             ingredientsModal: null,
             mergeList: [],
-            unmergedList: [],
+            needsRushes: [],
             async init() {
                 this.listChiTietBan = await this.getAllOrderItem();
                 this.ingredientsModal = new bootstrap.Modal(document.getElementById('ingredientsModal'));
@@ -305,6 +284,7 @@
                         }
                         return order;
                     });
+                    this.needsRushes = orders.filter(item => item.needsRush).sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
                     orders.forEach(item => {
                         if (!allowStatus.includes(item.status)) {
                             return;
@@ -315,9 +295,19 @@
                         }
                         mapIdStatus.get(key).push(item);
                     });
-                    this.mergeList = Array.from(mapIdStatus.values());
-                    this.unmergedList = orders.filter(item => !allowStatus.includes(item.status));
-                    console.log({mergeList: this.mergeList, unmergedList: this.unmergedList});
+                    const merge = Array.from(mapIdStatus.values());
+                    const unmergedList = orders.filter(item => !allowStatus.includes(item.status)).map(item => [item]);
+                    this.mergeList= [...merge, ...unmergedList];
+                    this.mergeList.sort((a, b) => {
+                        if (a.some(item => item.needsRush) && !b.some(item => item.needsRush)) {
+                            return -1;
+                        }
+                        if (!a.some(item => item.needsRush) && b.some(item => item.needsRush)) {
+                            return 1;
+                        }
+                        return 0;
+                    });
+
                     return orders;
               
                 }

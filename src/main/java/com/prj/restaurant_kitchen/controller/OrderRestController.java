@@ -198,6 +198,10 @@ public class OrderRestController {
                 .map(record -> record.getIdMon())
                 .collect(Collectors.toSet());
         chiTietBanList.sort((r1, r2) -> {
+            // ưu tiên theo needsRush
+            if (r1.isNeedsRush() && !r2.isNeedsRush()) {
+                return -1;
+            }
             // Ưu tiên theo status
             if ("Đang nấu".equals(r1.getStatus()) && !"Đang nấu".equals(r2.getStatus())) {
                 return -1;
@@ -226,4 +230,15 @@ public class OrderRestController {
     public List<ChiTietBan> getOrderByTable(@PathVariable int id) {
         return chiTietBanRepository.findByIdBan(id);
     }
+
+    @PutMapping("{id}/rush")
+    public Map<String, Object> rush(@PathVariable int id) {
+        var chiTietBan = chiTietBanRepository.findById(id);
+        chiTietBan.ifPresent(ctb -> {
+            ctb.setNeedsRush(true);
+            chiTietBanRepository.save(ctb);
+        });
+        return Map.of("status", true);
+    }
+
 }

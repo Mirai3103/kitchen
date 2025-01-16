@@ -111,6 +111,12 @@
                                             x-bind:disabled="item.status !== 'Đang xử lý'">
                                         <i class="fas fa-trash-alt"></i>
                                     </button>
+                                    <button class="btn btn-sm btn-warning"
+                                            x-on:click="rushFood(item.id)"
+                                            
+                                            x-bind:disabled="item.status !== 'Đang xử lý' || item.needsRush">
+                                        <i class="fas fa-bolt"></i> Làm gấp
+                                    </button>
                                 </td>
                             </tr>
                         </template>
@@ -485,8 +491,29 @@
                 style: 'currency',
                 currency: 'VND'
             }).format(value);
+        },
+        async rushFood(id) {
+            if (confirm('Bạn có chắc chắn muốn đặt gấp món #' + id + '?')) {
+                try {
+                    const response = await fetch(`/api/order/\${id}/rush`, {
+                        method: 'PUT'
+                    });
+                    const result = await response.json();
+                    if (response.ok && result.status) {
+                        alert('Đặt gấp món thành công!');
+                        this.fetchCurrentTableOrder();
+                    } else {
+                        alert(result.message || 'Đặt gấp món thất bại. Vui lòng thử lại!');
+                    }
+                } catch (error) {
+                    console.error('Lỗi:', error);
+                    alert('Có lỗi xảy ra khi gửi yêu cầu. Vui lòng thử lại!');
+                }
+            }
         }
     };
+
+   
 }
 
 </script>
