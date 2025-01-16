@@ -458,7 +458,7 @@
 
  function currentTableData() {
     return {
-        tableId: 1,
+        tableId: <%= ban.getId() %>,
         listChiTietBan: [],
         fetchCurrentTableOrder() {
             const tableId = this.tableId; // Sử dụng `this.tableId` để lấy giá trị từ đối tượng

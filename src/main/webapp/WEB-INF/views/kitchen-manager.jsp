@@ -122,7 +122,63 @@
     </div>
 
     <div class="order-list">
-        <template x-for="chiTiet in listChiTietBan" :key="chiTiet.id">
+          <template x-for="(list, index) in mergeList" :key="index">
+            <div class="order-item">
+                <div class="row align-items-center">
+                    <div class="col-lg-4 col-md-6 mb-3 mb-lg-0">
+                        <h5 class="dish-name mb-2" x-text="list[0].mon.tenMon">
+                        </h5>
+                     
+                         <template x-for="item in list" :key="item.id">
+                            <p class="order-details mb-0"><strong>Bàn - Phòng:</strong> <span x-text="item.ban.tenBan + ' - ' + item.phong.tenPhong"></span>
+                            <b> x<span x-text="item.soLuong"></span></b>
+                            </p>
+
+                        </template>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-3 mb-lg-0">
+                        <p class="order-details mb-1"><strong>Tổng số lượng:</strong> <span x-text="list.reduce((acc, item) => acc + item.soLuong, 0)"></span> </p>
+                        <p class="order-details mb-0"><strong>Đặt lúc:</strong> <span x-text="formatDate(list[0].createdAt)"></span></p>
+                    </div>
+                    <div class="col-lg-2 col-md-6 mb-3 mb-lg-0">
+                        <span class="status-badge me-2"
+                              :class="{
+                                  'bg-warning text-dark': list[0].status === 'Đang xử lý',
+                                  'bg-info text-white': list[0].status === 'Đang nấu',
+                              }"
+                              x-text="list[0].status"></span>
+                        <span class="priority-badge"
+                              :class="{
+                                  'bg-danger text-white': list[0].priority === 'High',
+                                  'bg-warning text-dark': list[0].priority === 'Medium',
+                                  'bg-info text-white': list[0].priority === 'Low'
+                              }"
+                              x-text="list[0].priority"></span>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <div class="d-flex flex-column flex-sm-row justify-content-lg-end align-items-stretch gap-2">
+                            <button class="btn btn-outline-info btn-sm btn-action flex-grow-1"
+                                    @click="viewIngredients(list[0].mon.id)">
+                                <i class="fas fa-list-ul me-1"></i>Xem nguyên liệu
+                            </button>
+                            <button class="btn btn-primary btn-sm btn-action flex-grow-1"
+                                    x-show="list[0].status === 'Đang xử lý'"
+                                    @click="list.forEach(item => startCooking(item.id))"
+                                    >
+                                <i class="fas fa-fire me-1"></i>Nhận món
+                            </button>
+                            <button class="btn btn-success btn-sm btn-action flex-grow-1"
+                                    x-show="list[0].status === 'Đang nấu'"
+                                    @click="list.forEach(item => finishCooking(item.id))"
+                                    >
+                                <i class="fas fa-check me-1"></i>Hoàn thành nấu
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+        <template x-for="chiTiet in unmergedList" :key="chiTiet.id">
             <div class="order-item">
                 <div class="row align-items-center">
                     <div class="col-lg-4 col-md-6 mb-3 mb-lg-0">
@@ -221,6 +277,8 @@
             listChiTietBan: [],
             currentRecipe: [],
             ingredientsModal: null,
+            mergeList: [],
+            unmergedList: [],
             async init() {
                 this.listChiTietBan = await this.getAllOrderItem();
                 this.ingredientsModal = new bootstrap.Modal(document.getElementById('ingredientsModal'));
@@ -234,8 +292,9 @@
                 });
                 if (response.ok) {
                     const orders = await response.json();
-                    // Add priority based on waiting time
-                    return orders.map(order => {
+                    const mapIdStatus = new Map();
+                    const allowStatus = ['Đang xử lý', 'Đang nấu'];
+                    order =orders.map(order => {
                         const waitingTime = new Date() - new Date(order.createdAt);
                         if (waitingTime > 30 * 60 * 1000) { // More than 30 minutes
                             order.priority = 'High';
@@ -246,6 +305,21 @@
                         }
                         return order;
                     });
+                    orders.forEach(item => {
+                        if (!allowStatus.includes(item.status)) {
+                            return;
+                        }
+                        const key = `\${item.idMon}-\${item.status}`;
+                        if (!mapIdStatus.has(key)) {
+                            mapIdStatus.set(key, []);
+                        }
+                        mapIdStatus.get(key).push(item);
+                    });
+                    this.mergeList = Array.from(mapIdStatus.values());
+                    this.unmergedList = orders.filter(item => !allowStatus.includes(item.status));
+                    console.log({mergeList: this.mergeList, unmergedList: this.unmergedList});
+                    return orders;
+              
                 }
                 return [];
             },
