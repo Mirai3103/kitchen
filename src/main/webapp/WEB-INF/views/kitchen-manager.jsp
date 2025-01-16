@@ -296,9 +296,9 @@
                     const allowStatus = ['Đang xử lý', 'Đang nấu'];
                     order =orders.map(order => {
                         const waitingTime = new Date() - new Date(order.createdAt);
-                        if (waitingTime > 30 * 60 * 1000) { // More than 30 minutes
+                        if (waitingTime > 30 * 60 * 100) { // More than 30 minutes
                             order.priority = 'High';
-                        } else if (waitingTime > 15 * 60 * 1000) { // More than 15 minutes
+                        } else if (waitingTime > 15 * 60 * 100) { // More than 15 minutes
                             order.priority = 'Medium';
                         } else {
                             order.priority = 'Low';
