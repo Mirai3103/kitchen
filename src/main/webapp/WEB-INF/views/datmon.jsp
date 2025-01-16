@@ -88,7 +88,11 @@
                         </tr>
                         </thead>
                         <tbody id="orderTableBody">
+<<<<<<< HEAD
 
+=======
+                   
+>>>>>>> 4946b4c58a920590d5dcf092f05e0bf06d3265d1
                         <template x-for="item in listChiTietBan" :key="item.id">
                             <tr>
                                 <td x-text="item.id"></td>
@@ -415,6 +419,7 @@
     }, 3000); // Add a new notification every 10 seconds
 </script>
 
+<<<<<<< HEAD
 <script>
 
     function currentTableData() {
@@ -449,6 +454,48 @@
             }
         };
     }
+=======
+        // Simulating new notifications (for demo purposes)
+        setInterval(() => {
+            fetchNoti();
+        }, 3000); // Add a new notification every 10 seconds
+    </script>
+
+<script>
+
+ function currentTableData() {
+    return {
+        tableId: 1,
+        listChiTietBan: [],
+        fetchCurrentTableOrder() {
+            const tableId = this.tableId; // Sử dụng `this.tableId` để lấy giá trị từ đối tượng
+            fetch(`/api/order/by-table/\${tableId}`)
+                .then(response => response.json())
+                .then(data => {
+                    this.listChiTietBan = data;
+                })
+                .catch(error => {
+                    console.error("Error fetching table order:", error);
+                });
+        },
+        init() {
+            this.fetchCurrentTableOrder();
+            setInterval(() => {
+                this.fetchCurrentTableOrder();
+            }, 3000); // Cập nhật danh sách món mỗi 3 giây
+        },
+        formatVietnameseCurrency(value) {
+            if (typeof value !== 'number') {
+                return value;
+            }
+            return new Intl.NumberFormat('vi-VN', {
+                style: 'currency',
+                currency: 'VND'
+            }).format(value);
+        }
+    };
+}
+>>>>>>> 4946b4c58a920590d5dcf092f05e0bf06d3265d1
 
 </script>
 </body>

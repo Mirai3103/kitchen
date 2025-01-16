@@ -27,4 +27,8 @@ public interface ChiTietBanRepository extends JpaRepository<ChiTietBan, Integer>
     List<ChiTietBan> findAllByStatusNotInOrderByIdDesc(List<String> status);
 
     Optional<ChiTietBan> findFirstByStatusAndIdMonAndIdBan(String status, int idMon, int idBan);
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 4946b4c58a920590d5dcf092f05e0bf06d3265d1
