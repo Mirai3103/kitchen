@@ -3,8 +3,6 @@ package com.prj.restaurant_kitchen.controller;
 import com.prj.restaurant_kitchen.entities.MenuItem;
 import com.prj.restaurant_kitchen.repository.MenuItemRepository;
 
-import jakarta.servlet.http.HttpServletRequest;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

@@ -15,6 +15,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome for icons -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+
     <style>
         .card-img-top {
             height: 200px;
@@ -32,7 +34,7 @@
     </style>
 </head>
 <body class="bg-light">
-<div class="container-fluid mt-4">
+<div class="container-fluid mt-4" x-data="currentTableData()" x-init="init()">
     <%
         Ban ban = (Ban) request.getAttribute("ban");
         Phong phong = ban.getPhong();
@@ -48,15 +50,15 @@
             </h2>
         </div>
         <div class="col-auto d-flex gap-2">
-          <div class="dropdown">
-            <button class="btn btn-primary dropdown-toggle" type="button" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="bi bi-bell-fill"></i>
-                <span id="unreadCount" class="badge bg-danger"></span>
-            </button>
-            <ul class="dropdown-menu" aria-labelledby="notificationDropdown" id="notificationList">
-                <!-- Notifications will be dynamically added here -->
-            </ul>
-        </div>
+            <div class="dropdown">
+                <button class="btn btn-primary dropdown-toggle" type="button" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-bell-fill"></i>
+                    <span id="unreadCount" class="badge bg-danger"></span>
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="notificationDropdown" id="notificationList">
+                    <!-- Notifications will be dynamically added here -->
+                </ul>
+            </div>
             <a href="/order-table" class="btn">
                 <i class="fas fa-arrow-left me-2"></i>Quay lại
             </a>
@@ -86,45 +88,37 @@
                         </tr>
                         </thead>
                         <tbody id="orderTableBody">
-                        <%
-                            if (listChiTietBan != null && !listChiTietBan.isEmpty()) {
-                                for (ChiTietBan chiTiet : listChiTietBan) {
-                        %>
-                        <tr>
-                            <td><%= chiTiet.getId() %></td>
-                            <td><%= chiTiet.getMon().getTenMon() %></td>
-                            <td><%= chiTiet.getSoLuong() %></td>
-                            <td><%= String.format("%.2f", chiTiet.getDonGia()) %></td>
-                            <td><%= String.format("%.2f", chiTiet.getThanhTien()) %></td>
-                            <td>
-                                <span class="badge bg-<%= chiTiet.getStatus().equals("Đang xử lý") ? "warning" : "success" %>">
-                                    <%= chiTiet.getStatus() %>
-                                </span>
-                            </td>
-                            <td>
-                                <%-- Nút Phục vụ: chỉ kích hoạt khi trạng thái là "Đợi phục vụ" --%>
-                                <button class="btn btn-sm btn-secondary me-2"
-                                        onclick="serveOrder(<%= chiTiet.getId() %>)"
-                                        <% if (!"Đợi phục vụ".equals(chiTiet.getStatus())) { %>disabled<% } %>>
-                                    <i class="fas fa-check"></i> Phục vụ
-                                </button>
 
-                                <%-- Nút Xóa: kích hoạt khi trạng thái là "Đang xử lý" --%>
-                                <button class="btn btn-sm btn-danger"
-                                        onclick="cancelOrder(<%= chiTiet.getId() %>)"
-                                        <%= !chiTiet.getStatus().equals("Đang xử lý") ? "disabled" : "" %>>
-                                    <i class="fas fa-trash-alt"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        <%
-                            }
-                        } else {
-                        %>
-                        <tr>
+                        <template x-for="item in listChiTietBan" :key="item.id">
+                            <tr>
+                                <td x-text="item.id"></td>
+                                <td x-text="item.mon.tenMon"></td>
+                                <td x-text="item.soLuong"></td>
+                                <td x-text="formatVietnameseCurrency(item.mon.gia)"></td>
+                                <td x-text="formatVietnameseCurrency(item.thanhTien)"></td>
+                                <td>
+                                    <span x-bind:class="'badge bg-' + (item.status === 'Đang xử lý' ? 'warning' : 'success')">
+                                        <span x-text="item.status"></span>
+                                    </span>
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-secondary me-2"
+                                            x-on:click="serveOrder(item.id)"
+                                            x-bind:disabled="item.status !== 'Đợi phục vụ'">
+                                        <i class="fas fa-check"></i> Phục vụ
+                                    </button>
+                                    <button class="btn btn-sm btn-danger"
+                                            x-on:click="cancelOrder(item.id)"
+                                            x-bind:disabled="item.status !== 'Đang xử lý'">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </template>
+                        <tr x-show="listChiTietBan.length === 0">
                             <td colspan="7" class="text-center">Không có món nào được thêm.</td>
                         </tr>
-                        <% } %>
+
                         </tbody>
                     </table>
                 </div>
@@ -357,68 +351,105 @@
 
 </script>
 <script>
-        // Sample notifications data (replace with actual data from your backend)
-        let notifications = [];
+    // Sample notifications data (replace with actual data from your backend)
+    let notifications = [];
 
-        function updateNotifications() {
-            const notificationList = document.getElementById('notificationList');
-            const unreadCount = document.getElementById('unreadCount');
-            
-            // Clear existing notifications
-            notificationList.innerHTML = '';
-            
-            // Count unread notifications
-            const unreadNotifications = notifications.filter(n => !n.isRead).length;
-            unreadCount.textContent = unreadNotifications > 0 ? unreadNotifications : '';
-            
-            // Add notifications to the dropdown
-            notifications.forEach(notification => {
-                const li = document.createElement('li');
-                li.innerHTML = `
+    function updateNotifications() {
+        const notificationList = document.getElementById('notificationList');
+        const unreadCount = document.getElementById('unreadCount');
+
+        // Clear existing notifications
+        notificationList.innerHTML = '';
+
+        // Count unread notifications
+        const unreadNotifications = notifications.filter(n => !n.isRead).length;
+        unreadCount.textContent = unreadNotifications > 0 ? unreadNotifications : '';
+
+        // Add notifications to the dropdown
+        notifications.forEach(notification => {
+            const li = document.createElement('li');
+            li.innerHTML = `
                     <a class="dropdown-item notification-item \${notification.isRead ? '' : 'unread'}" href="\${notification.navigationLink}" onclick="markAsRead(\${notification.id}, event)">
                         \${notification.message}
                         \${notification.isRead ? '' : '<span class="ms-2 badge bg-primary">Mới</span>'}
                     </a>
                 `;
-                notificationList.appendChild(li);
-            });
-            
-          
-        }
+            notificationList.appendChild(li);
+        });
 
-        function markAsRead(id, event) {
-            event.preventDefault();
-            const notification = notifications.find(n => n.id === id);
-            deleteNotification(id, notification);
-        }
 
-        function deleteNotification(id, notification) {
-            fetch('/api/notification/' + id, {
-                method: 'DELETE'
-            }).then(() => {
-                notifications = notifications.filter(n => n.id !== id);
+    }
+
+    function markAsRead(id, event) {
+        event.preventDefault();
+        const notification = notifications.find(n => n.id === id);
+        deleteNotification(id, notification);
+    }
+
+    function deleteNotification(id, notification) {
+        fetch('/api/notification/' + id, {
+            method: 'DELETE'
+        }).then(() => {
+            notifications = notifications.filter(n => n.id !== id);
+            updateNotifications();
+            if( notification.navigationLink) window.location.href = notification.navigationLink;
+        })
+    }
+
+
+    async  function fetchNoti(){
+        const tableId = <%= ban.getId() %>;
+        return fetch('/api/notification/table/'+tableId)
+            .then(response => response.json())
+            .then(data => {
+                notifications = data;
                 updateNotifications();
-               if( notification.navigationLink) window.location.href = notification.navigationLink;
-            })
-        }
+            });
+    }
+    fetchNoti();
+    // Initial update
 
-     
-      async  function fetchNoti(){
-         const tableId = <%= ban.getId() %>;
-            return fetch('/api/notification/table/'+tableId)
-                .then(response => response.json())
-                .then(data => {
-                    notifications = data;
-                    updateNotifications();
-                });
-        }
+    // Simulating new notifications (for demo purposes)
+    setInterval(() => {
         fetchNoti();
-        // Initial update
+    }, 3000); // Add a new notification every 10 seconds
+</script>
 
-        // Simulating new notifications (for demo purposes)
-        setInterval(() => {
-            fetchNoti();
-        }, 3000); // Add a new notification every 10 seconds
-    </script>
+<script>
+
+    function currentTableData() {
+        return {
+            tableId: 1,
+            listChiTietBan: [],
+            fetchCurrentTableOrder() {
+                const tableId = this.tableId; // Sử dụng `this.tableId` để lấy giá trị từ đối tượng
+                fetch(`/api/order/by-table/\${tableId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        this.listChiTietBan = data;
+                    })
+                    .catch(error => {
+                        console.error("Error fetching table order:", error);
+                    });
+            },
+            init() {
+                this.fetchCurrentTableOrder();
+                setInterval(() => {
+                    this.fetchCurrentTableOrder();
+                }, 3000); // Cập nhật danh sách món mỗi 3 giây
+            },
+            formatVietnameseCurrency(value) {
+                if (typeof value !== 'number') {
+                    return value;
+                }
+                return new Intl.NumberFormat('vi-VN', {
+                    style: 'currency',
+                    currency: 'VND'
+                }).format(value);
+            }
+        };
+    }
+
+</script>
 </body>
 </html>
