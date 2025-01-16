@@ -88,11 +88,6 @@
                         </tr>
                         </thead>
                         <tbody id="orderTableBody">
-<<<<<<< HEAD
-
-=======
-                   
->>>>>>> 4946b4c58a920590d5dcf092f05e0bf06d3265d1
                         <template x-for="item in listChiTietBan" :key="item.id">
                             <tr>
                                 <td x-text="item.id"></td>
@@ -419,7 +414,6 @@
     }, 3000); // Add a new notification every 10 seconds
 </script>
 
-<<<<<<< HEAD
 <script>
 
     function currentTableData() {
@@ -454,7 +448,6 @@
             }
         };
     }
-=======
         // Simulating new notifications (for demo purposes)
         setInterval(() => {
             fetchNoti();
@@ -495,7 +488,6 @@
         }
     };
 }
->>>>>>> 4946b4c58a920590d5dcf092f05e0bf06d3265d1
 
 </script>
 </body>
