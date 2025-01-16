@@ -67,13 +67,23 @@ public class OrderRestController {
             b.setStatus("Đã đặt món");
             banRepository.save(b);
         });
-        ChiTietBan chiTietBan = new ChiTietBan();
-        chiTietBan.setSoLuong(orderRequest.quantity);
-        chiTietBan.setIdBan(orderRequest.tableId);
-        chiTietBan.setIdPhong(orderRequest.roomId);
-        chiTietBan.setIdMon(orderRequest.menuItemId);
-        chiTietBan.setDonGia(menuItemOp.get().getGia());
-        chiTietBanRepository.save(chiTietBan);
+        var sameItemThatNotCooking = chiTietBanRepository.findFirstByStatusAndIdMonAndIdBan("Đang xử lý",
+                orderRequest.menuItemId,
+                orderRequest.tableId);
+        if (sameItemThatNotCooking.isPresent()) {
+            sameItemThatNotCooking.get().setSoLuong(sameItemThatNotCooking.get().getSoLuong() + orderRequest.quantity);
+            chiTietBanRepository.save(sameItemThatNotCooking.get());
+
+        } else {
+            ChiTietBan chiTietBan = new ChiTietBan();
+            chiTietBan.setSoLuong(orderRequest.quantity);
+            chiTietBan.setIdBan(orderRequest.tableId);
+            chiTietBan.setIdPhong(orderRequest.roomId);
+            chiTietBan.setIdMon(orderRequest.menuItemId);
+            chiTietBan.setDonGia(menuItemOp.get().getGia());
+            chiTietBanRepository.save(chiTietBan);
+        }
+
         Notification notification = new Notification();
         notification.setTableId(orderRequest.tableId);
         notification.setMessage(
@@ -180,7 +190,8 @@ public class OrderRestController {
 
     @GetMapping("kitchen")
     public List<ChiTietBan> getAllOrderItem() {
-        var chiTietBanList = chiTietBanRepository.findAllByStatusNotInOrderByIdDesc(List.of("Hoàn thành"));
+        var chiTietBanList = chiTietBanRepository
+                .findAllByStatusNotInOrderByIdDesc(List.of("Hoàn thành", "Đợi phục vụ"));
 
         Set<Integer> pendingCategoryIds = chiTietBanList.stream()
                 .filter(record -> "Đang nấu".equals(record.getStatus()))
@@ -206,7 +217,14 @@ public class OrderRestController {
             // Sắp xếp theo thời gian
             return r1.getCreatedAt().compareTo(r2.getCreatedAt());
         });
+        var waitToServe = chiTietBanRepository.findAllByStatusInOrderByIdDesc(List.of("Đợi phục vụ"));
+        chiTietBanList.addAll(waitToServe);
         return chiTietBanList;
+    }
+
+    @GetMapping("by-table/{id}")
+    public List<ChiTietBan> getOrderByTable(@PathVariable int id) {
+        return chiTietBanRepository.findByIdBan(id);
     }
 
 }
