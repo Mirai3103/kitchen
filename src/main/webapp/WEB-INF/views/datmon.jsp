@@ -295,7 +295,7 @@
 
     function serveOrder(orderId) {
         if (confirm('Bạn có chắc chắn muốn phục vụ món #' + orderId + '?')) {
-            fetch(`/api/order/served/${orderId}`, {
+            fetch(`/api/order/served/\${orderId}`, {
                 method: 'PUT'
             })
                 .then(response => response.json())

@@ -28,41 +28,61 @@
             color: #2c3e50;
             font-weight: 600;
         }
-        .order-card {
+        .order-list {
             background-color: #ffffff;
-            border-radius: 10px;
+            border-radius: 15px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .order-item {
+            border-bottom: 1px solid #e9ecef;
             transition: all 0.3s ease;
-            margin-bottom: 20px;
+            padding: 1.5rem;
         }
-        .order-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        .order-item:last-child {
+            border-bottom: none;
         }
-        .order-card .card-header {
-            background-color: #3498db;
-            color: #ffffff;
-            border-top-left-radius: 10px;
-            border-top-right-radius: 10px;
-            padding: 15px;
+        .order-item:hover {
+            background-color: #f8f9fa;
         }
-        .order-card .card-body {
-            padding: 20px;
+        .dish-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        .order-details {
+            font-size: 0.9rem;
+            color: #5a6a7e;
         }
         .status-badge {
             font-size: 0.8rem;
-            padding: 5px 10px;
+            padding: 0.3rem 0.6rem;
             border-radius: 20px;
+            font-weight: 500;
+        }
+        .priority-badge {
+            font-size: 0.75rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 12px;
+            font-weight: 600;
         }
         .btn-action {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.85rem;
             border-radius: 20px;
-            padding: 5px 15px;
-            font-size: 0.9rem;
-            margin-right: 5px;
-            margin-bottom: 5px;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
         .modal-content {
             border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         .modal-header {
             background-color: #3498db;
@@ -71,14 +91,19 @@
             border-top-right-radius: 15px;
         }
         .modal-body {
-            padding: 20px;
+            padding: 2rem;
         }
         .ingredients-table {
             border-radius: 10px;
             overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
         .ingredients-table th {
             background-color: #ecf0f1;
+            font-weight: 600;
+        }
+        .ingredients-table td, .ingredients-table th {
+            padding: 0.75rem 1rem;
         }
     </style>
 </head>
@@ -96,37 +121,45 @@
         </div>
     </div>
 
-    <div class="row" id="orderCardContainer">
+    <div class="order-list">
         <template x-for="chiTiet in listChiTietBan" :key="chiTiet.id">
-            <div class="col-md-6 col-lg-4">
-                <div class="order-card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0" x-text="chiTiet.mon.tenMon"></h5>
-                        <span class="status-badge"
+            <div class="order-item">
+                <div class="row align-items-center">
+                    <div class="col-lg-4 col-md-6 mb-3 mb-lg-0">
+                        <h5 class="dish-name mb-2" x-text="chiTiet.mon.tenMon"></h5>
+                        <p class="order-details mb-0"><strong>Bàn - Phòng:</strong> <span x-text="chiTiet.ban.tenBan + ' - ' + chiTiet.phong.tenPhong"></span></p>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-3 mb-lg-0">
+                        <p class="order-details mb-1"><strong>Số lượng:</strong> <span x-text="chiTiet.soLuong"></span></p>
+                        <p class="order-details mb-0"><strong>Đặt lúc:</strong> <span x-text="formatDate(chiTiet.createdAt)"></span></p>
+                    </div>
+                    <div class="col-lg-2 col-md-6 mb-3 mb-lg-0">
+                        <span class="status-badge me-2"
                               :class="{
-                                  'bg-warning': chiTiet.status === 'Đang xử lý',
-                                  'bg-info': chiTiet.status === 'Đang nấu',
+                                  'bg-warning text-dark': chiTiet.status === 'Đang xử lý',
+                                  'bg-info text-white': chiTiet.status === 'Đang nấu',
                               }"
                               x-text="chiTiet.status"></span>
+                        <span class="priority-badge"
+                              :class="{
+                                  'bg-danger text-white': chiTiet.priority === 'High',
+                                  'bg-warning text-dark': chiTiet.priority === 'Medium',
+                                  'bg-info text-white': chiTiet.priority === 'Low'
+                              }"
+                              x-text="chiTiet.priority"></span>
                     </div>
-                    <div class="card-body">
-                        <p><strong>ID:</strong> <span x-text="chiTiet.id"></span></p>
-                        <p><strong>Bàn - Phòng:</strong> <span x-text="chiTiet.ban.tenBan + ' - ' + chiTiet.phong.tenPhong"></span></p>
-                        <p><strong>Số lượng:</strong> <span x-text="chiTiet.soLuong"></span></p>
-                        <p><strong>Đơn giá:</strong> <span x-text="formatCurrency(chiTiet.donGia)"></span></p>
-                        <p><strong>Thành tiền:</strong> <span x-text="formatCurrency(chiTiet.thanhTien)"></span></p>
-                        <p><strong>Đặt lúc:</strong> <span x-text="formatDate(chiTiet.createdAt)"></span></p>
-                        <div class="mt-3">
-                            <button class="btn btn-outline-info btn-action"
+                    <div class="col-lg-3 col-md-6">
+                        <div class="d-flex flex-column flex-sm-row justify-content-lg-end align-items-stretch gap-2">
+                            <button class="btn btn-outline-info btn-sm btn-action flex-grow-1"
                                     @click="viewIngredients(chiTiet.mon.id)">
                                 <i class="fas fa-list-ul me-1"></i>Xem nguyên liệu
                             </button>
-                            <button class="btn btn-primary btn-action"
+                            <button class="btn btn-primary btn-sm btn-action flex-grow-1"
                                     x-show="chiTiet.status === 'Đang xử lý'"
                                     @click="startCooking(chiTiet.id)">
                                 <i class="fas fa-fire me-1"></i>Nhận món
                             </button>
-                            <button class="btn btn-success btn-action"
+                            <button class="btn btn-success btn-sm btn-action flex-grow-1"
                                     x-show="chiTiet.status === 'Đang nấu'"
                                     @click="finishCooking(chiTiet.id)">
                                 <i class="fas fa-check me-1"></i>Hoàn thành nấu
@@ -136,8 +169,8 @@
                 </div>
             </div>
         </template>
-        <div class="col-12" x-show="listChiTietBan.length === 0">
-            <div class="alert alert-info text-center">Không có món nào cần làm.</div>
+        <div class="p-4" x-show="listChiTietBan.length === 0">
+            <div class="alert alert-info text-center mb-0">Không có món nào cần làm.</div>
         </div>
     </div>
 
@@ -200,7 +233,19 @@
                     method: 'GET'
                 });
                 if (response.ok) {
-                    return await response.json();
+                    const orders = await response.json();
+                    // Add priority based on waiting time
+                    return orders.map(order => {
+                        const waitingTime = new Date() - new Date(order.createdAt);
+                        if (waitingTime > 30 * 60 * 1000) { // More than 30 minutes
+                            order.priority = 'High';
+                        } else if (waitingTime > 15 * 60 * 1000) { // More than 15 minutes
+                            order.priority = 'Medium';
+                        } else {
+                            order.priority = 'Low';
+                        }
+                        return order;
+                    });
                 }
                 return [];
             },
@@ -265,3 +310,4 @@
 </script>
 </body>
 </html>
+
