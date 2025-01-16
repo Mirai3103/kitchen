@@ -18,18 +18,51 @@
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 
     <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+        }
+        .card {
+            border: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
         .card-img-top {
             height: 200px;
             object-fit: cover;
+            border-top-left-radius: 0.5rem;
+            border-top-right-radius: 0.5rem;
         }
         .menu-item-card:hover {
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            transform: translateY(-5px);
-            transition: all 0.3s ease;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
         }
         .order-table {
             max-height: 400px;
             overflow-y: auto;
+        }
+        .btn-primary {
+            background-color: #4e73df;
+            border-color: #4e73df;
+        }
+        .btn-primary:hover {
+            background-color: #2e59d9;
+            border-color: #2e59d9;
+        }
+        .btn-success {
+            background-color: #1cc88a;
+            border-color: #1cc88a;
+        }
+        .btn-success:hover {
+            background-color: #17a673;
+            border-color: #17a673;
+        }
+        .table th {
+            background-color: #f8f9fc;
+            color: #4e73df;
+            font-weight: 600;
         }
     </style>
 </head>
@@ -44,18 +77,18 @@
 
     <div class="row mb-4">
         <div class="col">
-            <h2 class="display-6">
+            <h2 class="display-6 text-primary">
                 <i class="fas fa-utensils me-2"></i>
                 Đặt món cho <%= ban.getTenBan() %> - <%= phong.getTenPhong() %>
             </h2>
         </div>
         <div class="col-auto d-flex gap-2">
             <div class="dropdown">
-                <button class="btn btn-primary dropdown-toggle" type="button" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="bi bi-bell-fill"></i>
+                <button class="btn btn-outline-primary dropdown-toggle" type="button" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-bell"></i>
                     <span id="unreadCount" class="badge bg-danger"></span>
                 </button>
-                <ul class="dropdown-menu" aria-labelledby="notificationDropdown" id="notificationList">
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationDropdown" id="notificationList">
                     <!-- Notifications will be dynamically added here -->
                 </ul>
             </div>
@@ -96,24 +129,23 @@
                                 <td x-text="formatVietnameseCurrency(item.mon.gia)"></td>
                                 <td x-text="formatVietnameseCurrency(item.thanhTien)"></td>
                                 <td>
-                                    <span x-bind:class="'badge bg-' + (item.status === 'Đang xử lý' ? 'warning' : 'success')">
+                                    <span x-bind:class="'badge ' + (item.status === 'Đang xử lý' ? 'bg-warning' : 'bg-success')">
                                         <span x-text="item.status"></span>
                                     </span>
                                 </td>
                                 <td>
-                                    <button class="btn btn-sm btn-secondary me-2"
+                                    <button class="btn btn-sm btn-outline-secondary me-2"
                                             x-on:click="serveOrder(item.id)"
                                             x-bind:disabled="item.status !== 'Đợi phục vụ'">
                                         <i class="fas fa-check"></i> Phục vụ
                                     </button>
-                                    <button class="btn btn-sm btn-danger"
+                                    <button class="btn btn-sm btn-outline-danger"
                                             x-on:click="cancelOrder(item.id)"
                                             x-bind:disabled="item.status !== 'Đang xử lý'">
                                         <i class="fas fa-trash-alt"></i>
                                     </button>
-                                    <button class="btn btn-sm btn-warning"
+                                    <button class="btn btn-sm btn-outline-warning"
                                             x-on:click="rushFood(item.id)"
-                                            
                                             x-bind:disabled="item.status !== 'Đang xử lý' || item.needsRush">
                                         <i class="fas fa-bolt"></i> Làm gấp
                                     </button>
@@ -123,7 +155,6 @@
                         <tr x-show="listChiTietBan.length === 0">
                             <td colspan="7" class="text-center">Không có món nào được thêm.</td>
                         </tr>
-
                         </tbody>
                     </table>
                 </div>
@@ -168,7 +199,6 @@
                 </div>
             </div>
             <div class="text-center">
-                <!-- Nút "Đã phục vụ bàn này" gọi API thông qua BanController -->
                 <button class="btn btn-lg btn-success" onclick="finishService()">
                     <i class="fas fa-check-circle me-1"></i>Đã phục vụ bàn này
                 </button>
@@ -178,15 +208,18 @@
 
     <div class="row mt-4">
         <div class="col">
-            <h3 class="mb-3">Thực đơn</h3>
+            <h3 class="mb-3 text-primary">Thực đơn</h3>
             <div class="row row-cols-1 row-cols-md-3 g-4">
                 <%
                     if (menuItems != null && !menuItems.isEmpty()) {
                         for (MenuItem menuItem : menuItems) {
+                            String imagePath = menuItem.getHinhAnh() != null
+                                    ? "/images/" + menuItem.getHinhAnh()
+                                    : "/images/placeholder.jpg";
                 %>
                 <div class="col">
                     <div class="card h-100 menu-item-card">
-                        <img src="<%= menuItem.getHinhAnh() != null ? menuItem.getHinhAnh() : "/placeholder.jpg" %>" class="card-img-top" alt="<%= menuItem.getTenMon() %>">
+                        <img src="<%= imagePath %>" class="card-img-top" alt="<%= menuItem.getTenMon() %>">
                         <div class="card-body">
                             <h5 class="card-title"><%= menuItem.getTenMon() %></h5>
                             <p class="card-text">Giá: <%= String.format("%.2f", menuItem.getGia()) %></p>

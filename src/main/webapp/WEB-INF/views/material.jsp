@@ -33,7 +33,7 @@
      
         <div class="d-flex justify-content-between">
             <h2 class="mb-4">Danh sách nguyên liệu và lô  nguyên liệu</h2>
-            <button
+            <button class="btn"
             onclick="window.history.back()"
             >Quay lại</button>
 	    </div>

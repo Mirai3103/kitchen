@@ -17,7 +17,7 @@ import java.util.List;
 @RequestMapping("/menu")
 public class MenuController {
 
-    private static final String IMAGE_DIR = "images";
+    private static final String IMAGE_DIR = "src/main/webapp/images";
 
     @Autowired
     private MenuItemRepository menuRepository;

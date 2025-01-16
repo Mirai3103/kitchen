@@ -112,7 +112,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2><i class="fas fa-utensils me-2"></i>Danh sách món cần làm</h2>
         <div>
-            
+
           <div class="d-flex gap-2">
           <a href="/material" class="btn btn-primary me-2">
                 <i class="fas fa-box me-1"></i>Xem kho nguyên liệu
@@ -147,7 +147,7 @@
                     <div class="col-lg-4 col-md-6 mb-3 mb-lg-0">
                         <h5 class="dish-name mb-2" x-text="list[0].mon.tenMon">
                         </h5>
-                     
+
                          <template x-for="item in list" :key="item.id">
                             <p class="order-details mb-0"><strong>Bàn - Phòng:</strong> <span x-text="item.ban.tenBan + ' - ' + item.phong.tenPhong"></span>
                             <b> x<span x-text="item.soLuong"></span></b>
@@ -155,8 +155,8 @@
                               x-show="item.needsRush">
                                 Cần gấp
                               </span>
-                            </p> 
-                           
+                            </p>
+
                         </template>
                     </div>
                     <div class="col-lg-3 col-md-6 mb-3 mb-lg-0">
@@ -177,8 +177,8 @@
                                   'bg-info text-white': list[0].priority === 'Low'
                               }"
                               x-text="list[0].priority"></span>
-                        
-                                   
+
+
                     </div>
                     <div class="col-lg-3 col-md-6">
                         <div class="d-flex flex-column flex-sm-row justify-content-lg-end align-items-stretch gap-2">
@@ -203,7 +203,7 @@
                 </div>
             </div>
         </template>
-       
+
         <div class="p-4" x-show="listChiTietBan.length === 0">
             <div class="alert alert-info text-center mb-0">Không có món nào cần làm.</div>
         </div>
@@ -309,7 +309,7 @@
                     });
 
                     return orders;
-              
+
                 }
                 return [];
             },
