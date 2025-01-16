@@ -51,7 +51,9 @@ public class ChiTietBan {
 	private String status = "Đang xử lý";
 	@Column(nullable = true)
 	private Timestamp createdAt = new Timestamp(System.currentTimeMillis());
-	
+
+	private boolean needsRush = false;
+
 	// Custom Setter for `soLuong` and `donGia` to calculate `thanhTien`
 	public void setSoLuong(int soLuong) {
 		this.soLuong = soLuong;

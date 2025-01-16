@@ -56,36 +56,29 @@
             <i class="fas fa-arrow-left me-2"></i>Quay lại
         </a>
     </div>
-    <div class="row g-4">
-        <%
-            List<Ban> listBan = (List<Ban>)request.getAttribute("listBan");
-            System.out.println(listBan.size());
-            if(listBan != null) {
-                for(Ban ban : listBan) {
-        %>
-        <div class="col-6 col-md-4 col-lg-3">
-            <a href="datmon/<%= ban.getId() %>" class="text-decoration-none ">
-                <div class="table-card position-relative <%= ban.getStatus().equals("Trống") ? "" : "occupied" %>">
-                    <h5><%= ban.getTenBan() %></h5>
-                    <span class="table-status badge <%= ban.getStatus().equals("Trống") ? "bg-success" : "bg-danger" %>">
-                                <%= ban.getStatus() %>
-                            </span>
-                    <small class="mt-2"><%= ban.getPhong().getTenPhong() %></small>
-                     <span
-                        id="notification-table-<%= ban.getId() %>"
-                        x-text="notiMapByTableId[<%= ban.getId() %>]?.length || 0"
-                      class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                      
+    <div class="row g-4" x-data="tableData()" x-init="init()">
+    
+        <template x-for="table in tables" :key="table.id">
+            <div class="col-6 col-md-4 col-lg-3">
+            <a :href="'datmon/' + table.id" class="text-decoration-none">
+                <div class="table-card position-relative" 
+                    :class="table.status === 'Trống' ? '' : 'occupied'">
+                <h5 x-text="table.tenBan"></h5>
+                <span class="table-status badge" 
+                        :class="table.status === 'Trống' ? 'bg-success' : 'bg-danger'"
+                        x-text="table.status"></span>
+                <small class="mt-2" x-text="table.phong.tenPhong"></small>
+                <span 
+                    :id="'notification-table-' + table.id"
+                    class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                    x-text="notiMapByTableId[table.id]?.length || 0">
                     <span class="visually-hidden">unread messages</span>
                 </span>
                 </div>
-                 
             </a>
-        </div>
-        <%
-                }
-            }
-        %>
+            </div>
+        </template>
+         
     </div>
 </div>
 
@@ -115,6 +108,30 @@
         }
     }
 }
+</script>
+
+<script>
+    function tableData() {
+     return {
+         tables: [],
+         fetchTable() {
+             fetch('/api/ban')
+                 .then(response => response.json())
+                 .then(data => {
+                     this.tables = data;
+                     console.log(data);
+                 });
+         },
+
+         init() {
+             this.fetchTable();
+             setInterval(() => {
+                 this.fetchTable();
+             }, 3000);
+         }
+     }
+
+ }
 </script>
 </body>
 </html>
